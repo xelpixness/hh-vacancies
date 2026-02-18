@@ -1,4 +1,6 @@
 import requests
+from pprint import pprint
+from models import Vacancy
 
 # 'GET https://api.hh.ru/vacancies?text=python&per_page=100&page=0'
 
@@ -17,19 +19,11 @@ response_dict = r.json()
 print(f"Total vacancies: {response_dict['found']}")
 
 vacancies_dict = response_dict["items"]
+
 try:
-    vacancy_dict = vacancies_dict[0]
+    vacancy_dict = vacancies_dict[1]
+    vac = Vacancy.from_api(vacancy_dict)
+    pprint(vac.model_dump())
 
-    print("\n🔮 Selected information about first vacancy:\n")
-
-    print(f"Vacancy URL: {vacancy_dict['alternate_url']}")
-    print(f"API URL: {vacancy_dict['employer']['vacancies_url']}")
-
-    print(f"Name: {vacancy_dict['name']}")
-    print(f"Company: {vacancy_dict['employer']['name']}")
-    print(f"Experience: {vacancy_dict['experience']['name']}")
-    print("Work Formats:")
-    for i, format in enumerate(vacancy_dict["work_format"], 1):
-        print(f"\t{i}. {format['name']}")
 except IndexError:
     pass
