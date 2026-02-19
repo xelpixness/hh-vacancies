@@ -1,52 +1,13 @@
 from fastapi import FastAPI, Query
 import uvicorn
 import json
-from models import VacanciesResponse
+import time
+from src.models import VacanciesResponse
 from typing import Literal
+from src.parser.hh_parser import HHParser
+from src.utils import apply_filters, cache, CACHE_TTL
 
 app = FastAPI()
-
-
-# --------------------------
-# filters
-# --------------------------
-def map_experience(exp_str: str | None) -> str | None:
-    if not exp_str:
-        return None
-    exp_str = exp_str.lower()
-    if "нет опыта" in exp_str:
-        return "no_experience"
-    if "от 1 года до 3 лет" in exp_str:
-        return "1_3"
-    if "от 3 до 6 лет" in exp_str:
-        return "3_6"
-    if "более 6 лет" in exp_str:
-        return "6_plus"
-    return None
-
-
-def filter_remote(vacancy: dict, remote: bool | None) -> bool:
-    if remote is None:
-        return True
-    work_format = vacancy.get("work_format") or []
-    return any(wf.lower() == "удалённо" for wf in work_format) if remote else True
-
-
-def filter_experience(vacancy: dict, experience_list: list[str] | None) -> bool:
-    if not experience_list:
-        return True
-    vacancy_exp = map_experience(vacancy.get("experience"))
-    return vacancy_exp in experience_list
-
-
-def apply_filters(
-    vacancies: list[dict], remote: bool | None, experience_list: list[str] | None
-) -> list[dict]:
-    return [
-        v
-        for v in vacancies
-        if filter_remote(v, remote) and filter_experience(v, experience_list)
-    ]
 
 
 # --------------------------
@@ -60,9 +21,20 @@ def get_jobs(
     experience: list[Literal["no_experience", "1_3", "3_6", "6_plus"]] | None = Query(
         None, description="Categories: no_experience, 1_3, 3_6, 6_plus"
     ),
+    query: str | None = Query(None, description="Search keywords for HH API"),
 ) -> VacanciesResponse:
-    with open("vacancies.json", "r", encoding="utf-8") as file:
-        data = json.load(file)
+
+    if query:
+        now = time.time()
+        cached = cache.get(query)
+        if cached and (now - cached["timestamp"]) < CACHE_TTL:
+            data = cached["data"]
+        else:
+            parser = HHParser(search_words=query, per_page=per_page, max_pages=5)
+            data = parser.fetch_all()
+            cache[query] = {"data": data, "timestamp": now}
+    else:
+        data = []
 
     data = apply_filters(data, remote=remote, experience_list=experience)
 
@@ -80,4 +52,4 @@ def get_jobs(
 
 
 if __name__ == "__main__":
-    uvicorn.run("main:app", reload=True)
+    uvicorn.run("src.main:app", reload=True)
