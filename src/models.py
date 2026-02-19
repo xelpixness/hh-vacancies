@@ -46,7 +46,6 @@ class Vacancy(BaseModel):
             else None
         )
 
-        # work_format — безопасно собираем список
         work_format_raw = v.get("work_format") or []
         work_format = [wf.get("name") for wf in work_format_raw if wf.get("name")]
 
@@ -66,3 +65,10 @@ class Vacancy(BaseModel):
             requirement=(v.get("snippet") or {}).get("requirement"),
             responsibility=(v.get("snippet") or {}).get("responsibility"),
         )
+
+
+class VacanciesResponse(BaseModel):
+    items: List[Vacancy]
+    total: int
+    page: int
+    per_page: int
