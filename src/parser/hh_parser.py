@@ -19,9 +19,9 @@ class HHParser:
         else:
             self.max_pages = min(max_pages, self.MAX_PAGES_LIMIT)
         self.headers = {"User-Agent": "hh-vacancies/0.1 (pet-project)"}
-        self.vacancies: List[dict] = []
+        self.vacancies: List[VacancySchema] = []
 
-    def fetch_page(self, page: int) -> tuple[List[dict], int, int]:
+    def fetch_page(self, page: int) -> tuple[List[VacancySchema], int, int]:
         params = {"text": self.search_words, "per_page": self.per_page, "page": page}
         try:
             r = requests.get(
@@ -33,7 +33,7 @@ class HHParser:
             return [], 0, 0
 
         data = r.json()
-        items = [VacancySchema.from_api(v).model_dump() for v in data.get("items", [])]
+        items = [VacancySchema.from_api(v) for v in data.get("items", [])]
         total_pages = data.get("pages", 0)
         total_found = data.get("found", 0)
 

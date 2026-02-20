@@ -1,5 +1,6 @@
 import time
 from typing import List
+from src.models import VacancySchema
 
 # --------------------------
 # cache
@@ -26,22 +27,26 @@ def map_experience(exp_str: str | None) -> str | None:
     return None
 
 
-def filter_remote(vacancy: dict, remote: bool | None) -> bool:
+def filter_remote(vacancy: VacancySchema, remote: bool | None) -> bool:
     if remote is None:
         return True
-    work_format = vacancy.get("work_format") or []
+    work_format = vacancy.work_format or []
     return any(wf.lower() == "удалённо" for wf in work_format) if remote else True
 
 
-def filter_experience(vacancy: dict, experience_list: list[str] | None) -> bool:
+def filter_experience(
+    vacancy: VacancySchema, experience_list: list[str] | None
+) -> bool:
     if not experience_list:
         return True
-    vacancy_exp = map_experience(vacancy.get("experience"))
+    vacancy_exp = map_experience(vacancy.experience)
     return vacancy_exp in experience_list
 
 
 def apply_filters(
-    vacancies: List[dict], remote: bool | None, experience_list: list[str] | None
+    vacancies: List[VacancySchema],
+    remote: bool | None,
+    experience_list: list[str] | None,
 ) -> List[dict]:
     return [
         v

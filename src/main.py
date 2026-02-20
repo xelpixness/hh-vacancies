@@ -44,7 +44,7 @@ def get_jobs(
     items = data[start:end]
 
     return VacanciesResponseSchema(
-        items=[VacancySchema(**item) for item in items],
+        items=items,
         total=total,
         page=page,
         per_page=per_page,
