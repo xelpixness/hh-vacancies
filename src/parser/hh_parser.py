@@ -15,7 +15,7 @@ class HHParser:
         self.search_words = search_words
         self.per_page = min(per_page, self.PER_PAGE_LIMIT)
         if max_pages is None:
-            self.max_pages = self.MAX_PAGES_LIMIT
+            self.max_pages = 10  # 10 x 100 = 1000 items
         else:
             self.max_pages = min(max_pages, self.MAX_PAGES_LIMIT)
         self.headers = {"User-Agent": "hh-vacancies/0.1 (pet-project)"}

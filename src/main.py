@@ -3,8 +3,6 @@ import uvicorn
 import time
 from src.models import VacanciesResponseSchema, VacancySchema
 from typing import Literal
-from datetime import datetime
-from dateutil.parser import isoparse
 
 from src.parser.hh_parser import HHParser
 from src.utils import apply_filters, cache, CACHE_TTL, sort_vacancies
@@ -18,7 +16,7 @@ app = FastAPI()
 @app.get("/api/vacancies")
 def get_jobs(
     page: int = Query(1, ge=1),
-    per_page: int = Query(20, ge=1, le=50),
+    per_page: int = Query(20, ge=1, le=100),
     remote: bool | None = Query(None),
     experience: list[Literal["no_experience", "1_3", "3_6", "6_plus"]] | None = Query(
         None, description="Categories: no_experience, 1_3, 3_6, 6_plus"
@@ -34,14 +32,13 @@ def get_jobs(
         if cached and (now - cached["timestamp"]) < CACHE_TTL:
             data = cached["data"]
         else:
-            parser = HHParser(search_words=query, per_page=per_page, max_pages=100)
+            parser = HHParser(search_words=query)
             data = parser.fetch_all()
             cache[query] = {"data": data, "timestamp": now}
     else:
         data = []
 
     data = apply_filters(data, remote=remote, experience_list=experience, city=city)
-
     reverse = sort == "desc"
     data = sort_vacancies(data, by="published_at", reverse=reverse)
 
