@@ -21,7 +21,7 @@ class HHParser:
         self.headers = {"User-Agent": "hh-vacancies/0.1 (pet-project)"}
         self.vacancies: List[dict] = []
 
-    def fetch_page(self, page: int) -> List[dict]:
+    def fetch_page(self, page: int) -> tuple[List[dict], int, int]:
         params = {"text": self.search_words, "per_page": self.per_page, "page": page}
         try:
             r = requests.get(
@@ -30,22 +30,24 @@ class HHParser:
             r.raise_for_status()
         except requests.RequestException as e:
             print(f"Request failed on page {page}: {e}")
-            return []
+            return [], 0, 0
 
         data = r.json()
         items = [Vacancy.from_api(v).model_dump() for v in data.get("items", [])]
-        return items
+        total_pages = data.get("pages", 0)
+        total_found = data.get("found", 0)
+
+        return items, total_pages, total_found
 
     def fetch_all(self) -> List[dict]:
         self.vacancies = []
 
-        first_page = self.fetch_page(0)
+        first_page, total_pages_hh, total_found_hh = self.fetch_page(0)
         self.vacancies.extend(first_page)
 
         if not first_page:
             return self.vacancies
 
-        total_pages_hh, total_found_hh = self._get_search_metadata()
         print(f"Total pages: {total_pages_hh}, total vacancies found: {total_found_hh}")
 
         total_pages = min(total_pages_hh, self.max_pages)
@@ -70,23 +72,6 @@ class HHParser:
         with open(filename, "w", encoding="utf-8") as f:
             json.dump(self.vacancies, f, ensure_ascii=False, indent=2)
         print(f"Saved {len(self.vacancies)} vacancies to {filename}")
-
-    def _get_search_metadata(self) -> tuple[int, int]:
-        params = {"text": self.search_words, "per_page": self.per_page, "page": 0}
-        try:
-            r = requests.get(
-                self.BASE_URL, headers=self.headers, params=params, timeout=10
-            )
-            r.raise_for_status()
-        except requests.RequestException as e:
-            print(f"Failed to get total pages: {e}")
-            return 0, 0
-
-        response_dict = r.json()
-        total_pages = response_dict.get("pages", 0)
-        total_found = response_dict.get("found", 0)
-
-        return total_pages, total_found
 
 
 # --------------------------
