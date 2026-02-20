@@ -2,14 +2,14 @@ from typing import List, Optional
 from pydantic import BaseModel, Field
 
 
-class Salary(BaseModel):
+class SalarySchema(BaseModel):
     from_: Optional[float] = Field(default=None, alias="from")
     to: Optional[float] = None
     currency: Optional[str] = None
     gross: Optional[bool] = None
 
 
-class Vacancy(BaseModel):
+class VacancySchema(BaseModel):
     id: str
     name: Optional[str] = None
     published_at: Optional[str] = None
@@ -26,17 +26,16 @@ class Vacancy(BaseModel):
 
     work_format: List[str] = Field(default_factory=list)
 
-    salary: Optional[Salary] = None
+    salary: Optional[SalarySchema] = None
 
     requirement: Optional[str] = None
     responsibility: Optional[str] = None
 
     @classmethod
     def from_api(cls, v: dict):
-        # salary
         salary_raw = v.get("salary")
         salary = (
-            Salary(
+            SalarySchema(
                 from_=salary_raw.get("from") if salary_raw else None,
                 to=salary_raw.get("to") if salary_raw else None,
                 currency=salary_raw.get("currency") if salary_raw else None,
@@ -67,8 +66,8 @@ class Vacancy(BaseModel):
         )
 
 
-class VacanciesResponse(BaseModel):
-    items: List[Vacancy]
+class VacanciesResponseSchema(BaseModel):
+    items: List[VacancySchema]
     total: int
     page: int
     per_page: int

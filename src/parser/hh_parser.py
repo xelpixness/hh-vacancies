@@ -1,6 +1,6 @@
 import requests
 import json
-from src.models import Vacancy
+from src.models import VacancySchema
 from typing import List, Optional
 
 
@@ -33,7 +33,7 @@ class HHParser:
             return [], 0, 0
 
         data = r.json()
-        items = [Vacancy.from_api(v).model_dump() for v in data.get("items", [])]
+        items = [VacancySchema.from_api(v).model_dump() for v in data.get("items", [])]
         total_pages = data.get("pages", 0)
         total_found = data.get("found", 0)
 
@@ -57,7 +57,7 @@ class HHParser:
         )
 
         for page in range(1, total_pages):
-            page_items = self.fetch_page(page)
+            page_items, _, _ = self.fetch_page(page)
             if not page_items:
                 continue
             self.vacancies.extend(page_items)

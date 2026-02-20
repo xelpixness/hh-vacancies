@@ -2,7 +2,7 @@ from fastapi import FastAPI, Query
 import uvicorn
 import json
 import time
-from src.models import VacanciesResponse
+from src.models import VacanciesResponseSchema, VacancySchema
 from typing import Literal
 from src.parser.hh_parser import HHParser
 from src.utils import apply_filters, cache, CACHE_TTL
@@ -22,7 +22,7 @@ def get_jobs(
         None, description="Categories: no_experience, 1_3, 3_6, 6_plus"
     ),
     query: str | None = Query(None, description="Search keywords for HH API"),
-) -> VacanciesResponse:
+) -> VacanciesResponseSchema:
 
     if query:
         now = time.time()
@@ -43,12 +43,12 @@ def get_jobs(
     end = start + per_page
     items = data[start:end]
 
-    return {
-        "items": items,
-        "total": total,
-        "page": page,
-        "per_page": per_page,
-    }
+    return VacanciesResponseSchema(
+        items=[VacancySchema(**item) for item in items],
+        total=total,
+        page=page,
+        per_page=per_page,
+    )
 
 
 if __name__ == "__main__":
