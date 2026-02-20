@@ -1,5 +1,9 @@
 import time
 from typing import List
+
+from datetime import datetime
+from dateutil.parser import isoparse
+
 from src.models import VacancySchema
 
 # --------------------------
@@ -43,13 +47,37 @@ def filter_experience(
     return vacancy_exp in experience_list
 
 
+def filter_city(vacancy: VacancySchema, city: str | None) -> bool:
+    if not city:
+        return True
+    return vacancy.area_name and vacancy.area_name.lower() == city.lower()
+
+
 def apply_filters(
     vacancies: List[VacancySchema],
     remote: bool | None,
     experience_list: list[str] | None,
+    city: str | None = None,
 ) -> List[dict]:
     return [
         v
         for v in vacancies
-        if filter_remote(v, remote) and filter_experience(v, experience_list)
+        if filter_remote(v, remote)
+        and filter_experience(v, experience_list)
+        and filter_city(v, city)
     ]
+
+
+# --------------------------
+# sorting
+# --------------------------
+def sort_vacancies(
+    vacancies: List[VacancySchema], by: str = "published_at", reverse: bool = True
+) -> List[VacancySchema]:
+    if by == "published_at":
+        return sorted(
+            vacancies,
+            key=lambda v: isoparse(v.published_at) if v.published_at else datetime.min,
+            reverse=reverse,
+        )
+    return vacancies
