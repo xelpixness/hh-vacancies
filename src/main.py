@@ -14,7 +14,7 @@ app = FastAPI()
 # endpoints
 # --------------------------
 @app.get("/api/vacancies")
-def get_jobs(
+async def get_jobs(
     page: int = Query(1, ge=1),
     per_page: int = Query(20, ge=1, le=100),
     remote: bool | None = Query(None),
@@ -33,7 +33,7 @@ def get_jobs(
             data = cached["data"]
         else:
             parser = HHParser(search_words=query)
-            data = parser.fetch_all()
+            data = await parser.fetch_all()
             cache[query] = {"data": data, "timestamp": now}
     else:
         data = []
