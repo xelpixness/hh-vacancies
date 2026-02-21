@@ -1,13 +1,20 @@
 from fastapi import FastAPI, Query
 import uvicorn
 import time
+import json
 from src.models import VacanciesResponseSchema, VacancySchema
 from typing import Literal
 
 from src.parser.hh_parser import HHParser
 from src.utils import apply_filters, cache, CACHE_TTL, sort_vacancies
+from src.redis_client import redis_client
+from src.config import settings
 
 app = FastAPI()
+
+
+def build_cache_key(query: str | None) -> str:
+    return f"vacancies:{query or 'all'}"
 
 
 # --------------------------
@@ -26,17 +33,19 @@ async def get_jobs(
     sort: Literal["asc", "desc"] = Query("desc", description="Sort by published_at"),
 ) -> VacanciesResponseSchema:
 
+    data: list = []
+
     if query:
-        now = time.time()
-        cached = cache.get(query)
-        if cached and (now - cached["timestamp"]) < CACHE_TTL:
-            data = cached["data"]
+        key = build_cache_key(query)
+        cached = await redis_client.get(key)
+        if cached:
+            data = [VacancySchema.model_validate(v) for v in json.loads(cached)]
         else:
             parser = HHParser(search_words=query)
             data = await parser.fetch_all()
-            cache[query] = {"data": data, "timestamp": now}
-    else:
-        data = []
+            await redis_client.set(
+                key, json.dumps([v.model_dump() for v in data]), ex=settings.CACHE_TTL
+            )
 
     data = apply_filters(data, remote=remote, experience_list=experience, city=city)
     reverse = sort == "desc"
