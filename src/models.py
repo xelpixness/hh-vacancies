@@ -1,35 +1,34 @@
-from typing import List, Optional
 from pydantic import BaseModel, Field
 
 
 class SalarySchema(BaseModel):
-    from_: Optional[float] = Field(default=None, alias="from")
-    to: Optional[float] = None
-    currency: Optional[str] = None
-    gross: Optional[bool] = None
+    from_: float | None = Field(default=None, alias="from")
+    to: float | None = None
+    currency: str | None = None
+    gross: bool | None = None
 
 
 class VacancySchema(BaseModel):
     id: str
-    name: Optional[str] = None
-    published_at: Optional[str] = None
-    url: Optional[str] = None
+    name: str | None = None
+    published_at: str | None = None
+    url: str | None = None
 
-    area_name: Optional[str] = None
+    area_name: str | None = None
 
-    employer_name: Optional[str] = None
-    employer_url: Optional[str] = None
+    employer_name: str | None = None
+    employer_url: str | None = None
 
-    employment: Optional[str] = None
-    experience: Optional[str] = None
-    schedule: Optional[str] = None
+    employment: str | None = None
+    experience: str | None = None
+    schedule: str | None = None
 
-    work_format: List[str] = Field(default_factory=list)
+    work_format: list[str] = Field(default_factory=list)
 
-    salary: Optional[SalarySchema] = None
+    salary: SalarySchema | None = None
 
-    requirement: Optional[str] = None
-    responsibility: Optional[str] = None
+    requirement: str | None = None
+    responsibility: str | None = None
 
     @classmethod
     def from_api(cls, v: dict):
@@ -67,7 +66,7 @@ class VacancySchema(BaseModel):
 
 
 class VacanciesResponseSchema(BaseModel):
-    items: List[VacancySchema]
+    items: list[VacancySchema]
     total: int
     page: int
     per_page: int

@@ -1,7 +1,6 @@
 import requests
 import json
 from src.models import VacancySchema
-from typing import List, Optional
 
 
 class HHParser:
@@ -10,7 +9,7 @@ class HHParser:
     PER_PAGE_LIMIT = 100
 
     def __init__(
-        self, search_words: str, per_page: int = 100, max_pages: Optional[int] = None
+        self, search_words: str, per_page: int = 100, max_pages: int | None = None
     ):
         self.search_words = search_words
         self.per_page = min(per_page, self.PER_PAGE_LIMIT)
@@ -19,9 +18,9 @@ class HHParser:
         else:
             self.max_pages = min(max_pages, self.MAX_PAGES_LIMIT)
         self.headers = {"User-Agent": "hh-vacancies/0.1 (pet-project)"}
-        self.vacancies: List[VacancySchema] = []
+        self.vacancies: list[VacancySchema] = []
 
-    def fetch_page(self, page: int) -> tuple[List[VacancySchema], int, int]:
+    def fetch_page(self, page: int) -> tuple[list[VacancySchema], int, int]:
         params = {"text": self.search_words, "per_page": self.per_page, "page": page}
         try:
             r = requests.get(
@@ -39,8 +38,8 @@ class HHParser:
 
         return items, total_pages, total_found
 
-    def fetch_all(self) -> List[dict]:
-        self.vacancies = []
+    def fetch_all(self) -> list[VacancySchema]:
+        self.vacancies: list[VacancySchema] = []
 
         first_page, total_pages_hh, total_found_hh = self.fetch_page(0)
         self.vacancies.extend(first_page)

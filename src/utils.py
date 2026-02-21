@@ -1,6 +1,3 @@
-import time
-from typing import List
-
 from datetime import datetime
 from dateutil.parser import isoparse
 
@@ -54,11 +51,11 @@ def filter_city(vacancy: VacancySchema, city: str | None) -> bool:
 
 
 def apply_filters(
-    vacancies: List[VacancySchema],
+    vacancies: list[VacancySchema],
     remote: bool | None,
     experience_list: list[str] | None,
     city: str | None = None,
-) -> List[dict]:
+) -> list[VacancySchema]:
     return [
         v
         for v in vacancies
@@ -72,8 +69,8 @@ def apply_filters(
 # sorting
 # --------------------------
 def sort_vacancies(
-    vacancies: List[VacancySchema], by: str = "published_at", reverse: bool = True
-) -> List[VacancySchema]:
+    vacancies: list[VacancySchema], by: str = "published_at", reverse: bool = True
+) -> list[VacancySchema]:
     if by == "published_at":
         return sorted(
             vacancies,
