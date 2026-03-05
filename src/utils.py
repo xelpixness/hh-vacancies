@@ -3,12 +3,6 @@ from dateutil.parser import isoparse
 
 from src.models import VacancySchema
 
-# --------------------------
-# cache
-# --------------------------
-CACHE_TTL = 300
-cache: dict[str, dict] = {}
-
 
 # --------------------------
 # filters

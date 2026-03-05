@@ -41,6 +41,9 @@ class HHParser:
                     self.BASE_URL, headers=self.headers, params=params, timeout=10
                 )
                 r.raise_for_status()
+            except httpx.HTTPStatusError as e:
+                print(f"HTTP error on page {page}: {e.response.status_code}")
+                return [], 0, 0
             except httpx.RequestError as e:
                 print(f"Request failed on page {page}: {e}")
                 return [], 0, 0

@@ -4,13 +4,21 @@ import time
 import json
 from src.models import VacanciesResponseSchema, VacancySchema
 from typing import Literal
+from contextlib import asynccontextmanager
 
 from src.parser.hh_parser import HHParser
-from src.utils import apply_filters, cache, CACHE_TTL, sort_vacancies
+from src.utils import apply_filters, sort_vacancies
 from src.redis_client import redis_client
 from src.config import settings
 
-app = FastAPI()
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    yield
+    await redis_client.aclose()
+
+
+app = FastAPI(lifespan=lifespan)
 
 
 def build_cache_key(query: str | None) -> str:
