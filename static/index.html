@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HH Vacancies</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=Syne+Mono&display=swap" rel="stylesheet" />
+  <style>
+    /* ── Tokens ── */
+    [data-theme="dark"] {
+      --bg:           #0e0e0e;
+      --surface:      #161616;
+      --border:       #2a2a2a;
+      --border-hover: #555;
+      --accent:       #e8ff47;
+      --accent-hover: #d4eb2e;
+      --accent-fg:    #0e0e0e;
+      --text:         #f0f0f0;
+      --text-dim:     #888;
+      --text-faint:   #444;
+      --red:          #ff4545;
+      --theme-icon:   "☀";
+    }
+
+    [data-theme="light"] {
+      --bg:           #f2f3f5;
+      --surface:      #ffffff;
+      --border:       #dde1e8;
+      --border-hover: #aab0be;
+      --accent:       #1a1e26;
+      --accent-hover: #353c4a;
+      --accent-fg:    #ffffff;
+      --text:         #1a1e26;
+      --text-dim:     #6b7280;
+      --text-faint:   #b0b8c8;
+      --red:          #d94040;
+      --theme-icon:   "☾";
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Syne', sans-serif;
+      min-height: 100vh;
+      transition: background 0.25s, color 0.25s;
+    }
+
+    /* ── Top accent line ── */
+    body::before {
+      content: '';
+      display: block;
+      width: 100%;
+      height: 3px;
+      background: var(--accent);
+      transition: background 0.25s;
+    }
+
+    .container {
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 60px 32px 100px;
+    }
+
+    /* ── Header ── */
+    .header {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      margin-bottom: 64px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 24px;
+      transition: border-color 0.25s;
+    }
+
+    .header h1 {
+      font-size: 64px;
+      font-weight: 800;
+      letter-spacing: -2px;
+      line-height: 1;
+      color: var(--text);
+      transition: color 0.25s;
+    }
+
+    .header h1 em {
+      font-style: normal;
+      color: var(--accent);
+      transition: color 0.25s;
+    }
+
+    .header-right {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 10px;
+    }
+
+    .header .meta {
+      font-family: 'Syne Mono', monospace;
+      font-size: 11px;
+      color: var(--text-faint);
+      text-align: right;
+      letter-spacing: 1px;
+      line-height: 1.8;
+      transition: color 0.25s;
+    }
+
+    /* ── Theme toggle ── */
+    .theme-btn {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-dim);
+      font-family: 'Syne Mono', monospace;
+      font-size: 11px;
+      padding: 5px 12px;
+      cursor: pointer;
+      letter-spacing: 1px;
+      transition: all 0.15s;
+    }
+
+    .theme-btn:hover {
+      border-color: var(--border-hover);
+      color: var(--text);
+    }
+
+    /* ── Search ── */
+    .search-block { margin-bottom: 40px; }
+
+    .input-label {
+      font-family: 'Syne Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 3px;
+      color: var(--text-faint);
+      margin-bottom: 10px;
+      display: block;
+      text-transform: uppercase;
+      transition: color 0.25s;
+    }
+
+    .search-row { display: flex; }
+
+    input[type="text"] {
+      flex: 1;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-right: none;
+      color: var(--text);
+      font-family: 'Syne', sans-serif;
+      font-size: 17px;
+      padding: 15px 20px;
+      outline: none;
+      transition: border-color 0.2s, background 0.25s, color 0.25s;
+    }
+
+    input[type="text"]:focus { border-color: var(--accent); }
+    input[type="text"]::placeholder { color: var(--text-faint); }
+
+    .btn-search {
+      background: var(--accent);
+      border: 1px solid var(--accent);
+      color: var(--accent-fg);
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 13px;
+      padding: 0 32px;
+      cursor: pointer;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      transition: background 0.15s, color 0.25s, border-color 0.25s;
+    }
+
+    .btn-search:hover {
+      background: var(--accent-hover);
+      border-color: var(--accent-hover);
+    }
+
+    /* ── Filters ── */
+    .filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px 24px;
+      margin-bottom: 40px;
+      align-items: flex-end;
+      padding: 24px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      transition: background 0.25s, border-color 0.25s;
+    }
+
+    .filter-group { display: flex; flex-direction: column; gap: 10px; }
+    .filter-group.city-group { flex: 1; min-width: 180px; }
+
+    .filter-group.city-group input[type="text"] {
+      border-right: 1px solid var(--border);
+      font-size: 13px;
+      padding: 9px 13px;
+    }
+
+    .filter-group.city-group input[type="text"]:focus { border-color: var(--accent); }
+
+    .toggle-btn {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-dim);
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 11px;
+      padding: 8px 16px;
+      cursor: pointer;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      transition: all 0.15s;
+    }
+
+    .toggle-btn:hover { border-color: var(--border-hover); color: var(--text); }
+
+    .toggle-btn.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: var(--accent-fg);
+    }
+
+    .exp-row { display: flex; gap: 8px; flex-wrap: wrap; }
+
+    /* ── Status ── */
+    .status-line {
+      font-family: 'Syne Mono', monospace;
+      font-size: 12px;
+      color: var(--text-faint);
+      letter-spacing: 1px;
+      margin-bottom: 28px;
+      min-height: 20px;
+      transition: color 0.25s;
+    }
+
+    .status-line .count { color: var(--accent); font-size: 15px; transition: color 0.25s; }
+
+    /* ── Loading ── */
+    .loading {
+      text-align: center;
+      padding: 80px 0;
+      font-family: 'Syne Mono', monospace;
+      font-size: 13px;
+      color: var(--text-faint);
+      letter-spacing: 4px;
+      display: none;
+    }
+
+    .loading .cursor { color: var(--accent); animation: blink 0.9s step-end infinite; }
+    @keyframes blink { 50% { opacity: 0; } }
+
+    /* ── Cards ── */
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1px;
+      background: var(--border);
+      margin-bottom: 1px;
+      transition: background 0.25s;
+    }
+
+    .card {
+      background: var(--bg);
+      padding: 28px;
+      position: relative;
+      transition: background 0.15s;
+      animation: fadeIn 0.25s ease forwards;
+      opacity: 0;
+    }
+
+    @keyframes fadeIn { to { opacity: 1; } }
+
+    .card:hover { background: var(--surface); }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 28px; right: 28px;
+      width: 6px; height: 6px;
+      background: var(--accent);
+      opacity: 0;
+      transition: opacity 0.15s, background 0.25s;
+    }
+
+    .card:hover::before { opacity: 1; }
+
+    .card-name {
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 14px;
+      line-height: 1.35;
+      padding-right: 16px;
+      transition: color 0.25s;
+    }
+
+    .card-name a { color: inherit; text-decoration: none; }
+    .card-name a:hover { color: var(--accent); }
+
+    .card-meta {
+      font-family: 'Syne Mono', monospace;
+      font-size: 11px;
+      color: var(--text-faint);
+      margin-bottom: 4px;
+      transition: color 0.25s;
+    }
+
+    .card-meta span { color: var(--text-dim); }
+
+    .card-divider {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 16px 0;
+      transition: border-color 0.25s;
+    }
+
+    .card-text {
+      font-size: 12px;
+      color: var(--text-dim);
+      line-height: 1.7;
+      margin-bottom: 10px;
+      transition: color 0.25s;
+    }
+
+    .card-text .label {
+      font-family: 'Syne Mono', monospace;
+      font-size: 9px;
+      letter-spacing: 3px;
+      color: var(--text-faint);
+      text-transform: uppercase;
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    highlighttext { color: var(--accent); font-weight: 700; transition: color 0.25s; }
+
+    .card-formats { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 14px; }
+
+    .format-tag {
+      font-family: 'Syne Mono', monospace;
+      font-size: 9px;
+      border: 1px solid var(--border);
+      color: var(--text-faint);
+      padding: 3px 8px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      transition: border-color 0.25s, color 0.25s;
+    }
+
+    .format-tag.remote {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    /* ── Pagination ── */
+    .pagination-wrap {
+      border-top: 1px solid var(--border);
+      padding-top: 32px;
+      margin-top: 32px;
+      transition: border-color 0.25s;
+    }
+
+    .pagination { display: flex; justify-content: center; gap: 4px; flex-wrap: wrap; }
+
+    .page-btn {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-faint);
+      font-family: 'Syne Mono', monospace;
+      font-size: 12px;
+      padding: 8px 16px;
+      cursor: pointer;
+      transition: all 0.15s;
+      letter-spacing: 1px;
+    }
+
+    .page-btn:hover { border-color: var(--border-hover); color: var(--text); }
+
+    .page-btn.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: var(--accent-fg);
+      font-weight: 700;
+    }
+
+    .page-btn:disabled { opacity: 0.25; cursor: not-allowed; }
+
+    /* ── Error / Empty ── */
+    .error-msg {
+      font-family: 'Syne Mono', monospace;
+      color: var(--red);
+      font-size: 12px;
+      letter-spacing: 2px;
+      padding: 16px 20px;
+      border: 1px solid var(--red);
+      display: none;
+      margin-bottom: 24px;
+    }
+
+    .empty-msg {
+      text-align: center;
+      padding: 80px 0;
+      color: var(--text-faint);
+      font-family: 'Syne Mono', monospace;
+      font-size: 13px;
+      letter-spacing: 4px;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+
+    <div class="header">
+      <h1>HH<em>.</em>SEARCH</h1>
+      <div class="header-right">
+        <button class="theme-btn" id="themeBtn">LIGHT MODE</button>
+        <div class="meta">VACANCY TERMINAL<br>HH.RU API</div>
+      </div>
+    </div>
+
+    <div class="search-block">
+      <label class="input-label" for="queryInput">Search query</label>
+      <div class="search-row">
+        <input type="text" id="queryInput" placeholder="python developer, data engineer, devops..." autocomplete="off" />
+        <button class="btn-search" id="searchBtn">Search</button>
+      </div>
+    </div>
+
+    <div class="filters" id="filtersBlock" style="display:none;">
+      <div class="filter-group">
+        <span class="input-label">Format</span>
+        <button class="toggle-btn" id="remoteBtn">Remote only</button>
+      </div>
+      <div class="filter-group city-group">
+        <label class="input-label" for="cityInput">City</label>
+        <input type="text" id="cityInput" placeholder="Москва, Санкт-Петербург..." />
+      </div>
+      <div class="filter-group">
+        <span class="input-label">Experience</span>
+        <div class="exp-row">
+          <button class="toggle-btn" data-exp="no_experience">No exp</button>
+          <button class="toggle-btn" data-exp="1_3">1–3 yr</button>
+          <button class="toggle-btn" data-exp="3_6">3–6 yr</button>
+          <button class="toggle-btn" data-exp="6_plus">6+ yr</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="status-line" id="statusLine"></div>
+    <div class="error-msg" id="errorMsg"></div>
+    <div class="loading" id="loadingEl">FETCHING<span class="cursor">_</span></div>
+    <div class="empty-msg" id="emptyMsg">NO RESULTS FOUND</div>
+    <div class="cards" id="cardsContainer"></div>
+    <div class="pagination-wrap" id="paginationWrap" style="display:none;">
+      <div class="pagination" id="pagination"></div>
+    </div>
+
+  </div>
+
+  <script>
+    const state = { query: '', page: 1, perPage: 20, remote: false, experience: [], city: '' };
+
+    const queryInput     = document.getElementById('queryInput');
+    const searchBtn      = document.getElementById('searchBtn');
+    const remoteBtn      = document.getElementById('remoteBtn');
+    const cityInput      = document.getElementById('cityInput');
+    const filtersBlock   = document.getElementById('filtersBlock');
+    const statusLine     = document.getElementById('statusLine');
+    const loadingEl      = document.getElementById('loadingEl');
+    const emptyMsg       = document.getElementById('emptyMsg');
+    const errorMsg       = document.getElementById('errorMsg');
+    const cardsEl        = document.getElementById('cardsContainer');
+    const paginationEl   = document.getElementById('pagination');
+    const paginationWrap = document.getElementById('paginationWrap');
+    const themeBtn       = document.getElementById('themeBtn');
+    const expBtns        = document.querySelectorAll('[data-exp]');
+
+    // Theme toggle
+    themeBtn.addEventListener('click', () => {
+      const html = document.documentElement;
+      const isDark = html.getAttribute('data-theme') === 'dark';
+      html.setAttribute('data-theme', isDark ? 'light' : 'dark');
+      themeBtn.textContent = isDark ? 'DARK MODE' : 'LIGHT MODE';
+    });
+
+    remoteBtn.addEventListener('click', () => {
+      state.remote = !state.remote;
+      remoteBtn.classList.toggle('active', state.remote);
+      if (state.query) { state.page = 1; fetchVacancies(); }
+    });
+
+    let cityTimer;
+    cityInput.addEventListener('input', () => {
+      clearTimeout(cityTimer);
+      cityTimer = setTimeout(() => {
+        state.city = cityInput.value.trim();
+        if (state.query) { state.page = 1; fetchVacancies(); }
+      }, 600);
+    });
+
+    expBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const exp = btn.dataset.exp;
+        const idx = state.experience.indexOf(exp);
+        if (idx === -1) { state.experience.push(exp); btn.classList.add('active'); }
+        else { state.experience.splice(idx, 1); btn.classList.remove('active'); }
+        if (state.query) { state.page = 1; fetchVacancies(); }
+      });
+    });
+
+    searchBtn.addEventListener('click', () => {
+      const q = queryInput.value.trim();
+      if (!q) return;
+      state.query = q; state.page = 1;
+      fetchVacancies();
+    });
+
+    queryInput.addEventListener('keydown', e => { if (e.key === 'Enter') searchBtn.click(); });
+
+    function buildUrl() {
+      const p = new URLSearchParams();
+      p.set('query', state.query);
+      p.set('page', state.page);
+      p.set('per_page', state.perPage);
+      if (state.remote) p.set('remote', 'true');
+      if (state.city) p.set('city', state.city);
+      state.experience.forEach(e => p.append('experience', e));
+      return `/api/vacancies?${p.toString()}`;
+    }
+
+    async function fetchVacancies() {
+      setLoading(true); clearError();
+      try {
+        const res = await fetch(buildUrl());
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        filtersBlock.style.display = 'flex';
+        renderStatus(data.total, data.page, data.per_page);
+        renderCards(data.items);
+        renderPagination(data.total, data.page, data.per_page);
+      } catch (err) {
+        showError(`CONNECTION ERROR: ${err.message}`);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    function renderStatus(total, page, perPage) {
+      const from = (page - 1) * perPage + 1;
+      const to = Math.min(page * perPage, total);
+      statusLine.innerHTML = total > 0
+        ? `<span class="count">${total}</span> vacancies found &nbsp;·&nbsp; showing ${from}–${to}`
+        : '';
+    }
+
+    function formatDate(iso) {
+      if (!iso) return '—';
+      const d = new Date(iso);
+      return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    }
+
+    function renderCards(items) {
+      cardsEl.innerHTML = '';
+      emptyMsg.style.display = items.length === 0 ? 'block' : 'none';
+      items.forEach((v, i) => {
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.style.animationDelay = `${i * 25}ms`;
+        const formats = (v.work_format || []).map(f => {
+          const isRemote = f.toLowerCase() === 'удалённо';
+          return `<span class="format-tag ${isRemote ? 'remote' : ''}">${f.toUpperCase()}</span>`;
+        }).join('');
+        card.innerHTML = `
+          <div class="card-name"><a href="${v.url || '#'}" target="_blank" rel="noopener">${v.name || '—'}</a></div>
+          <div class="card-meta"><span>${v.employer_name || '—'}</span></div>
+          <div class="card-meta">${v.area_name || '—'} &nbsp;·&nbsp; ${formatDate(v.published_at)}</div>
+          ${v.experience ? `<div class="card-meta">Experience: <span>${v.experience}</span></div>` : ''}
+          <hr class="card-divider" />
+          ${v.requirement ? `<div class="card-text"><span class="label">Requirements</span>${v.requirement}</div>` : ''}
+          ${v.responsibility ? `<div class="card-text"><span class="label">Responsibilities</span>${v.responsibility}</div>` : ''}
+          ${formats ? `<div class="card-formats">${formats}</div>` : ''}
+        `;
+        cardsEl.appendChild(card);
+      });
+    }
+
+    function renderPagination(total, page, perPage) {
+      paginationEl.innerHTML = '';
+      const totalPages = Math.ceil(total / perPage);
+      paginationWrap.style.display = totalPages > 1 ? 'block' : 'none';
+      if (totalPages <= 1) return;
+
+      const prev = document.createElement('button');
+      prev.className = 'page-btn'; prev.textContent = '←'; prev.disabled = page === 1;
+      prev.addEventListener('click', () => { state.page--; fetchVacancies(); window.scrollTo(0,0); });
+      paginationEl.appendChild(prev);
+
+      let start = Math.max(1, page - 2);
+      let end = Math.min(totalPages, page + 2);
+      if (end - start < 4) {
+        if (start === 1) end = Math.min(totalPages, 5);
+        else start = Math.max(1, end - 4);
+      }
+      for (let p = start; p <= end; p++) {
+        const btn = document.createElement('button');
+        btn.className = 'page-btn' + (p === page ? ' active' : '');
+        btn.textContent = p;
+        const pg = p;
+        btn.addEventListener('click', () => { state.page = pg; fetchVacancies(); window.scrollTo(0,0); });
+        paginationEl.appendChild(btn);
+      }
+
+      const next = document.createElement('button');
+      next.className = 'page-btn'; next.textContent = '→'; next.disabled = page === totalPages;
+      next.addEventListener('click', () => { state.page++; fetchVacancies(); window.scrollTo(0,0); });
+      paginationEl.appendChild(next);
+    }
+
+    function setLoading(val) {
+      loadingEl.style.display = val ? 'block' : 'none';
+      cardsEl.style.display = val ? 'none' : 'grid';
+    }
+
+    function showError(msg) { errorMsg.textContent = msg; errorMsg.style.display = 'block'; }
+    function clearError() { errorMsg.style.display = 'none'; }
+  </script>
+</body>
+</html>

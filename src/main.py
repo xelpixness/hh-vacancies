@@ -10,6 +10,7 @@ from src.parser.hh_parser import HHParser
 from src.utils import apply_filters, sort_vacancies
 from src.redis_client import redis_client
 from src.config import settings
+from fastapi.responses import FileResponse
 
 
 @asynccontextmanager
@@ -28,6 +29,11 @@ def build_cache_key(query: str | None) -> str:
 # --------------------------
 # endpoints
 # --------------------------
+@app.get("/")
+async def index():
+    return FileResponse("static/index.html")
+
+
 @app.get("/api/vacancies")
 async def get_jobs(
     page: int = Query(1, ge=1),
