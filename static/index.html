@@ -674,11 +674,8 @@
       paginationEl.appendChild(prev);
 
       let start = Math.max(1, page - 2);
-      let end = Math.min(totalPages, page + 2);
-      if (end - start < 4) {
-        if (start === 1) end = Math.min(totalPages, 5);
-        else start = Math.max(1, end - 4);
-      }
+      let end = Math.min(totalPages - 1, page + 2);
+
       for (let p = start; p <= end; p++) {
         const btn = document.createElement('button');
         btn.className = 'page-btn' + (p === page ? ' active' : '');
@@ -687,6 +684,19 @@
         btn.addEventListener('click', () => { state.page = pg; fetchVacancies(); window.scrollTo(0,0); });
         paginationEl.appendChild(btn);
       }
+
+      if (end < totalPages - 1) {
+        const dots = document.createElement('span');
+        dots.textContent = '...';
+        dots.style.cssText = 'color: var(--text-faint); padding: 8px 4px; font-family: Syne Mono, monospace;';
+        paginationEl.appendChild(dots);
+      }
+
+      const lastBtn = document.createElement('button');
+      lastBtn.className = 'page-btn' + (page === totalPages ? ' active' : '');
+      lastBtn.textContent = totalPages;
+      lastBtn.addEventListener('click', () => { state.page = totalPages; fetchVacancies(); window.scrollTo(0,0); });
+      paginationEl.appendChild(lastBtn);
 
       const next = document.createElement('button');
       next.className = 'page-btn'; next.textContent = '→'; next.disabled = page === totalPages;
